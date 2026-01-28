@@ -16,6 +16,10 @@ const getPostTextElement = (root) => {
     ".feed-shared-update-v2__description .update-components-text",
     ".feed-shared-update-v2__commentary .update-components-text",
     "[data-test-id='main-feed-activity-card__commentary']",
+    "[data-test-id='main-feed-activity-card__commentary'] span[dir='ltr']",
+    "[data-test-id='main-feed-activity-card__commentary'] p",
+    "[data-testid='expandable-text-box']",
+    "span[dir='ltr']",
     ".update-components-text",
     ".feed-shared-update-v2__description",
     ".feed-shared-update-v2__commentary",
@@ -122,10 +126,21 @@ const rewritePost = async (post) => {
       return;
     }
 
-    const response = await chrome.runtime.sendMessage({
-      type: "REWRITE_TEXT",
-      text: sanitizedText,
-      language,
+    const response = await new Promise((resolve) => {
+      chrome.runtime.sendMessage(
+        {
+          type: "REWRITE_TEXT",
+          text: sanitizedText,
+          language,
+        },
+        (result) => {
+          if (chrome.runtime.lastError) {
+            resolve({ success: false, error: chrome.runtime.lastError.message });
+            return;
+          }
+          resolve(result);
+        }
+      );
     });
 
     if (!response?.success) {
