@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Linkedin2Reddit Settings</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Inter", "Segoe UI", sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        min-width: 280px;
+        background: #f7f8fb;
+        color: #1f2933;
+      }
+      h1 {
+        font-size: 16px;
+        margin: 0 0 12px 0;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 6px 16px rgba(16, 24, 40, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #52606d;
+      }
+      select,
+      input {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #d9e2ec;
+        font-size: 13px;
+      }
+      button {
+        padding: 10px;
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:disabled {
+        background: #9fb3c8;
+        cursor: not-allowed;
+      }
+      .status {
+        font-size: 12px;
+        min-height: 16px;
+      }
+      .status.success {
+        color: #0f766e;
+      }
+      .status.error {
+        color: #b91c1c;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Linkedin2Reddit Settings</h1>
+    <div class="card">
+      <div>
+        <label for="provider">Provider</label>
+        <select id="provider">
+          <option value="openai">OpenAI (GPT-4o-mini)</option>
+          <option value="gemini">Google Gemini</option>
+        </select>
+      </div>
+      <div>
+        <label for="apiKey">API Key</label>
+        <input id="apiKey" type="password" placeholder="Enter your API key" />
+      </div>
+      <button id="save">Save</button>
+      <div id="status" class="status"></div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
