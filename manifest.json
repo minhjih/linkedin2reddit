@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Linkedin2Reddit",
+  "version": "1.0.0",
+  "description": "Debullshitifying LinkedIn in real-time with DC Inside or Reddit-style rewrites.",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "https://api.openai.com/*",
+    "https://generativelanguage.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "Linkedin2Reddit",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*.linkedin.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
