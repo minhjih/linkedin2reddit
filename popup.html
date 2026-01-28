@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Linkedin2Reddit Settings</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "Inter", "Segoe UI", sans-serif;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        min-width: 280px;
+        background: #f7f8fb;
+        color: #1f2933;
+      }
+      h1 {
+        font-size: 16px;
+        margin: 0 0 12px 0;
+      }
+      .card {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 12px;
+        box-shadow: 0 6px 16px rgba(16, 24, 40, 0.08);
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #52606d;
+      }
+      select,
+      input {
+        width: 100%;
+        padding: 8px 10px;
+        border-radius: 8px;
+        border: 1px solid #d9e2ec;
+        font-size: 13px;
+      }
+      button {
+        padding: 10px;
+        background: #2563eb;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      button:disabled {
+        background: #9fb3c8;
+        cursor: not-allowed;
+      }
+      .status {
+        font-size: 12px;
+        min-height: 16px;
+      }
+      .status.success {
+        color: #0f766e;
+      }
+      .status.error {
+        color: #b91c1c;
+      }
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 0 4px;
+      }
+      .toggle {
+        position: relative;
+        width: 44px;
+        height: 24px;
+      }
+      .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background: #cbd2d9;
+        transition: 0.2s;
+        border-radius: 999px;
+      }
+      .slider::before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        top: 3px;
+        background-color: #fff;
+        transition: 0.2s;
+        border-radius: 50%;
+      }
+      .toggle input:checked + .slider {
+        background: #16a34a;
+      }
+      .toggle input:checked + .slider::before {
+        transform: translateX(20px);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Linkedin2Reddit Settings</h1>
+    <div class="card">
+      <div class="toggle-row">
+        <label for="enabled">Extension On</label>
+        <label class="toggle">
+          <input id="enabled" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div class="toggle-row">
+        <label for="localOnly">Local only (no API)</label>
+        <label class="toggle">
+          <input id="localOnly" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
+      <div>
+        <label for="provider">Provider</label>
+        <select id="provider">
+          <option value="openai">OpenAI (GPT-4o-mini)</option>
+          <option value="gemini">Google Gemini</option>
+        </select>
+      </div>
+      <div>
+        <label for="apiKey">API Key</label>
+        <input id="apiKey" type="password" placeholder="Enter your API key" />
+      </div>
+      <button id="save">Save</button>
+      <div id="status" class="status"></div>
+    </div>
+    <script src="popup.js"></script>
+  </body>
+</html>
