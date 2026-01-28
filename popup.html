@@ -65,11 +65,60 @@
       .status.error {
         color: #b91c1c;
       }
+      .toggle-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+        padding: 8px 0 4px;
+      }
+      .toggle {
+        position: relative;
+        width: 44px;
+        height: 24px;
+      }
+      .toggle input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+      .slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background: #cbd2d9;
+        transition: 0.2s;
+        border-radius: 999px;
+      }
+      .slider::before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        top: 3px;
+        background-color: #fff;
+        transition: 0.2s;
+        border-radius: 50%;
+      }
+      .toggle input:checked + .slider {
+        background: #16a34a;
+      }
+      .toggle input:checked + .slider::before {
+        transform: translateX(20px);
+      }
     </style>
   </head>
   <body>
     <h1>Linkedin2Reddit Settings</h1>
     <div class="card">
+      <div class="toggle-row">
+        <label for="enabled">Extension On</label>
+        <label class="toggle">
+          <input id="enabled" type="checkbox" />
+          <span class="slider"></span>
+        </label>
+      </div>
       <div>
         <label for="provider">Provider</label>
         <select id="provider">

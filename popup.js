@@ -2,6 +2,7 @@ const providerSelect = document.getElementById("provider");
 const apiKeyInput = document.getElementById("apiKey");
 const saveButton = document.getElementById("save");
 const status = document.getElementById("status");
+const enabledToggle = document.getElementById("enabled");
 
 const showStatus = (message, type) => {
   status.textContent = message;
@@ -9,17 +10,20 @@ const showStatus = (message, type) => {
 };
 
 const loadSettings = async () => {
-  const { provider, apiKey } = await chrome.storage.local.get({
+  const { provider, apiKey, enabled } = await chrome.storage.local.get({
     provider: "openai",
     apiKey: "",
+    enabled: true,
   });
   providerSelect.value = provider;
   apiKeyInput.value = apiKey;
+  enabledToggle.checked = enabled;
 };
 
 const saveSettings = async () => {
   const provider = providerSelect.value;
   const apiKey = apiKeyInput.value.trim();
+  const enabled = enabledToggle.checked;
 
   if (!apiKey) {
     showStatus("API key is required.", "error");
@@ -28,7 +32,7 @@ const saveSettings = async () => {
 
   saveButton.disabled = true;
   try {
-    await chrome.storage.local.set({ provider, apiKey });
+    await chrome.storage.local.set({ provider, apiKey, enabled });
     showStatus("Saved!", "success");
   } catch (error) {
     console.error("Failed to save settings", error);

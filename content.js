@@ -1,4 +1,5 @@
 const PROCESSED_ATTRIBUTE = "data-l2r-processed";
+let isEnabled = true;
 
 const detectLanguage = (text) => {
   if (/[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(text)) {
@@ -9,9 +10,11 @@ const detectLanguage = (text) => {
 
 const getPostTextElement = (root) => {
   return (
+    root.querySelector(".feed-shared-update-v2__description .update-components-text") ||
+    root.querySelector(".feed-shared-update-v2__commentary .update-components-text") ||
+    root.querySelector(".update-components-text") ||
     root.querySelector(".feed-shared-update-v2__description") ||
-    root.querySelector(".feed-shared-update-v2__commentary") ||
-    root.querySelector(".update-components-text")
+    root.querySelector(".feed-shared-update-v2__commentary")
   );
 };
 
@@ -55,6 +58,10 @@ const replacePostText = (textElement, newText) => {
 };
 
 const rewritePost = async (post) => {
+  if (!isEnabled) {
+    return;
+  }
+
   if (post.getAttribute(PROCESSED_ATTRIBUTE)) {
     return;
   }
@@ -64,7 +71,7 @@ const rewritePost = async (post) => {
     return;
   }
 
-  const originalText = textElement.textContent?.trim();
+  const originalText = textElement.innerText?.trim();
   if (!originalText) {
     return;
   }
@@ -101,6 +108,16 @@ const rewritePost = async (post) => {
 };
 
 const observeFeed = () => {
+  chrome.storage.local.get({ enabled: true }).then(({ enabled }) => {
+    isEnabled = enabled;
+  });
+
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName === "local" && changes.enabled) {
+      isEnabled = changes.enabled.newValue;
+    }
+  });
+
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       mutation.addedNodes.forEach((node) => {
