@@ -19,7 +19,7 @@ const getPostTextElement = (root) => {
     "[data-test-id='main-feed-activity-card__commentary'] span[dir='ltr']",
     "[data-test-id='main-feed-activity-card__commentary'] p",
     "[data-testid='expandable-text-box']",
-    "span[dir='ltr']",
+    "[data-testid='expandable-text-box'] span[dir='ltr']",
     ".update-components-text",
     ".feed-shared-update-v2__description",
     ".feed-shared-update-v2__commentary",
@@ -27,6 +27,9 @@ const getPostTextElement = (root) => {
 
   for (const selector of selectors) {
     const element = root.querySelector(selector);
+    if (element?.closest("button")) {
+      continue;
+    }
     if (element) {
       return element;
     }
@@ -74,6 +77,27 @@ const replacePostText = (textElement, newText) => {
   textElement.classList.remove("l2r-loading");
 };
 
+const ensureWritableElement = (textElement) => {
+  if (!textElement.matches("[data-testid='expandable-text-box']")) {
+    return textElement;
+  }
+
+  let container = textElement.querySelector("[data-l2r-text]");
+  if (!container) {
+    container = document.createElement("span");
+    container.dataset.l2rText = "true";
+
+    const button = textElement.querySelector("[data-testid='expandable-text-button']");
+    if (button) {
+      textElement.insertBefore(container, button);
+    } else {
+      textElement.appendChild(container);
+    }
+  }
+
+  return container;
+};
+
 const localRewrite = (text, language) => {
   if (language === "ko") {
     return `ㅋㅋ ${text}`
@@ -111,6 +135,8 @@ const rewritePost = async (post) => {
 
   post.setAttribute(PROCESSED_ATTRIBUTE, "true");
 
+  const writableElement = ensureWritableElement(textElement);
+
   const language = detectLanguage(originalText);
   const originalName = anonymizeName(post, language);
   const sanitizedText = originalName
@@ -118,11 +144,11 @@ const rewritePost = async (post) => {
     : originalText;
 
   applyStyle(post, language);
-  setLoadingState(textElement);
+  setLoadingState(writableElement);
 
   try {
     if (isLocalOnly) {
-      replacePostText(textElement, localRewrite(sanitizedText, language));
+      replacePostText(writableElement, localRewrite(sanitizedText, language));
       return;
     }
 
@@ -145,14 +171,14 @@ const rewritePost = async (post) => {
 
     if (!response?.success) {
       const errorMessage = response?.error || "Rewrite failed";
-      setErrorState(textElement, errorMessage);
+      setErrorState(writableElement, errorMessage);
       return;
     }
 
-    replacePostText(textElement, response.text || sanitizedText);
+    replacePostText(writableElement, response.text || sanitizedText);
   } catch (error) {
     console.error("Rewrite error", error);
-    replacePostText(textElement, localRewrite(sanitizedText, language));
+    replacePostText(writableElement, localRewrite(sanitizedText, language));
   }
 };
 
