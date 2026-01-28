@@ -1,5 +1,8 @@
 const PROCESSED_ATTRIBUTE = "data-l2r-processed";
+const POST_SELECTOR =
+  ".feed-shared-update-v2, article[data-urn^='urn:li:activity'], div[data-urn^='urn:li:activity']";
 let isEnabled = true;
+let isLocalOnly = false;
 
 const detectLanguage = (text) => {
   if (/[ㄱ-ㅎㅏ-ㅣ가-힣]/.test(text)) {
@@ -9,13 +12,23 @@ const detectLanguage = (text) => {
 };
 
 const getPostTextElement = (root) => {
-  return (
-    root.querySelector(".feed-shared-update-v2__description .update-components-text") ||
-    root.querySelector(".feed-shared-update-v2__commentary .update-components-text") ||
-    root.querySelector(".update-components-text") ||
-    root.querySelector(".feed-shared-update-v2__description") ||
-    root.querySelector(".feed-shared-update-v2__commentary")
-  );
+  const selectors = [
+    ".feed-shared-update-v2__description .update-components-text",
+    ".feed-shared-update-v2__commentary .update-components-text",
+    "[data-test-id='main-feed-activity-card__commentary']",
+    ".update-components-text",
+    ".feed-shared-update-v2__description",
+    ".feed-shared-update-v2__commentary",
+  ];
+
+  for (const selector of selectors) {
+    const element = root.querySelector(selector);
+    if (element) {
+      return element;
+    }
+  }
+
+  return null;
 };
 
 const anonymizeName = (root, language) => {
@@ -57,6 +70,22 @@ const replacePostText = (textElement, newText) => {
   textElement.classList.remove("l2r-loading");
 };
 
+const localRewrite = (text, language) => {
+  if (language === "ko") {
+    return `ㅋㅋ ${text}`
+      .replace(/성장|도전|기회/g, "헛소리")
+      .replace(/감사|고맙/g, "뭐함")
+      .slice(0, 180);
+  }
+
+  return text
+    .toLowerCase()
+    .replace(/(thrilled|excited|honored|proud)/g, "lol")
+    .replace(/(announce|announcement)/g, "posting")
+    .replace(/(opportunity|journey|mission)/g, "job")
+    .slice(0, 220);
+};
+
 const rewritePost = async (post) => {
   if (!isEnabled) {
     return;
@@ -88,6 +117,11 @@ const rewritePost = async (post) => {
   setLoadingState(textElement);
 
   try {
+    if (isLocalOnly) {
+      replacePostText(textElement, localRewrite(sanitizedText, language));
+      return;
+    }
+
     const response = await chrome.runtime.sendMessage({
       type: "REWRITE_TEXT",
       text: sanitizedText,
@@ -103,18 +137,29 @@ const rewritePost = async (post) => {
     replacePostText(textElement, response.text || sanitizedText);
   } catch (error) {
     console.error("Rewrite error", error);
-    setErrorState(textElement, "Please set API Key in extension settings");
+    replacePostText(textElement, localRewrite(sanitizedText, language));
   }
 };
 
 const observeFeed = () => {
-  chrome.storage.local.get({ enabled: true }).then(({ enabled }) => {
-    isEnabled = enabled;
-  });
+  chrome.storage.local
+    .get({ enabled: true, localOnly: false })
+    .then(({ enabled, localOnly }) => {
+      isEnabled = enabled;
+      isLocalOnly = localOnly;
+    });
 
   chrome.storage.onChanged.addListener((changes, areaName) => {
-    if (areaName === "local" && changes.enabled) {
+    if (areaName !== "local") {
+      return;
+    }
+
+    if (changes.enabled) {
       isEnabled = changes.enabled.newValue;
+    }
+
+    if (changes.localOnly) {
+      isLocalOnly = changes.localOnly.newValue;
     }
   });
 
@@ -125,11 +170,11 @@ const observeFeed = () => {
           return;
         }
 
-        if (node.matches?.(".feed-shared-update-v2")) {
+        if (node.matches?.(POST_SELECTOR)) {
           rewritePost(node);
         } else {
           node
-            .querySelectorAll?.(".feed-shared-update-v2")
+            .querySelectorAll?.(POST_SELECTOR)
             .forEach((post) => rewritePost(post));
         }
       });
@@ -141,9 +186,7 @@ const observeFeed = () => {
     subtree: true,
   });
 
-  document
-    .querySelectorAll(".feed-shared-update-v2")
-    .forEach((post) => rewritePost(post));
+  document.querySelectorAll(POST_SELECTOR).forEach((post) => rewritePost(post));
 };
 
 const start = () => {
