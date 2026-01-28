@@ -3,9 +3,8 @@
   "name": "Linkedin2Reddit",
   "version": "1.0.0",
   "description": "Debullshitifying LinkedIn in real-time with DC Inside or Reddit-style rewrites.",
-  "permissions": ["activeTab", "scripting", "storage"],
+  "permissions": ["storage"],
   "host_permissions": [
-    "*://*.linkedin.com/*",
     "https://api.openai.com/*",
     "https://generativelanguage.googleapis.com/*"
   ],
